@@ -91,6 +91,7 @@ const CustomPopup: FC = () => {
                   </Link>
                 </td>
               </tr>
+
               <tr>
                 <td className="text-center">
                   <MdFavoriteBorder />

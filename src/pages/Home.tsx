@@ -2,7 +2,9 @@ import { FC, useEffect } from "react";
 import HeroSection from "../components/HeroSection";
 import Features from "../components/Features";
 import TrendingProducts from "../components/TrendingProducts";
-import { useAppDispatch } from "../redux/hooks";
+import Admin from "../components/AdminPage";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
+
 import {
   updateNewList,
   updateFeaturedList,
@@ -39,14 +41,16 @@ const Home: FC = () => {
     };
     fetchProducts();
   }, [dispatch]);
-
+  const userData = useAppSelector((state) => state.authReducer.userData);
+  const role = userData ? userData.role : null;
   return (
     <div className="dark:bg-slate-800">
-      <HeroSection />
-      <Features />
-      <TrendingProducts />
-      <Banner />
-      <LatestProducts />
+      {role == 2 ? <Admin /> : <>  <HeroSection />
+        <Features />
+        <TrendingProducts />
+        <Banner />
+        <LatestProducts /></>}
+
       <br />
     </div>
   );

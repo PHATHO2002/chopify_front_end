@@ -11,13 +11,14 @@ import SingleProduct from "./pages/SingleProduct";
 import LoginModal from "./components/LoginModal";
 import Wishlist from "./pages/Wishlist";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import Profile from "./pages/Profile";
 import AllProducts from "./pages/AllProducts";
 import ScrollToTopButton from "./components/ScrollToTopButton";
 import BannerPopup from "./components/BannerPopup";
 import AllCategories from "./pages/AllCategories";
 import SingleCategory from "./pages/SingleCategory";
-
+import AddProduct from "./components/AddProduct";
 function App() {
   return (
     <Provider store={store}>
@@ -33,6 +34,9 @@ function App() {
         </Route>
         <Route path="/account" element={<ProtectedRoute />}>
           <Route path="/account" element={<Profile />} />
+        </Route>
+        <Route path="/admin/add-product" element={<AdminProtectedRoute />}>
+          <Route path="/admin/add-product" element={<AddProduct />} />
         </Route>
       </Routes>
       <Toaster position="bottom-center" reverseOrder={false} />
