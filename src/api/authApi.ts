@@ -26,7 +26,7 @@ export const login = async (userData: { userName: string; password: string; }) =
 
 
         // Gửi yêu cầu POST với dữ liệu JSON qua Axios
-        const { data }: { data: ApiResponse } = await axios.post(`${API_URL}/user/login`, userData, {
+        const { data }: { data: ApiResponse } = await axios.post(`${API_URL}/login`, userData, {
             headers: {
                 'Content-Type': 'application/json', // Thêm header nếu gửi JSON
             },
@@ -44,7 +44,7 @@ export const logout = async () => {
 
 
         // Gửi yêu cầu POST với dữ liệu JSON qua Axios
-        const { data }: { data: ApiResponse } = await axios.delete(`${API_URL}/user/logout`, {
+        const { data }: { data: ApiResponse } = await axios.delete(`${API_URL}/logout`, {
             headers: {
                 'Content-Type': 'application/json', // Thêm header nếu gửi JSON
                 'Authorization': `Bearer ${getAccessToken()}`,

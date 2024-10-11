@@ -109,7 +109,7 @@ const LoginModal: FC = () => {
         >
           <RxCross1
             className="absolute cursor-pointer right-5 top-5 hover:opacity-85"
-            onClick={() => dispatch(updateModal(false))}
+            onClick={() => { dispatch(updateModal(false)); setNotification("") }}
           />
           {clicked ? (
             <>
