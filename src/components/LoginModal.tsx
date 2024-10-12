@@ -14,22 +14,25 @@ const LoginModal: FC = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [notification, setNotification] = useState(""); // State cho thông báo
+  const [successMessage, setSuccessMessage] = useState(""); // State cho thông báo thành công
   const [selectedFile, setSelectedFile] = useState<File | null>(null); // State cho ảnh
   const [isSubmitting, setIsSubmitting] = useState(false);
   const dispatch = useAppDispatch();
   const open = useAppSelector((state) => state.authReducer.modalOpen);
-  // const error = useAppSelector((state) => state.authReducer.error);
-
 
   const submitForm = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true); // Bắt đầu loading
+    setNotification(""); // Reset thông báo trước khi gửi
+    setSuccessMessage(""); // Reset thông báo thành công trước khi gửi
+
+    if (userName === "" || password === "") {
+      setNotification("Thiếu userName hoặc mật khẩu"); // Thông báo lỗi chung
+      setIsSubmitting(false); // Kết thúc loading
+      return;
+    }
+
     try {
-
-      e.preventDefault();
-      if (userName == "" || password == "") {
-        setNotification("Thiếu userName hoặc mật khẩu"); // Thông báo lỗi chung
-        return;
-      }
-
       const respone = await login({ userName, password });
 
       if (respone.data) {
@@ -37,69 +40,65 @@ const LoginModal: FC = () => {
         let refreshToken = respone.data.refreshToken;
 
         dispatch(doLogin({ accessToken, refreshToken }));
-      }
-
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        // Bạn có thể lấy thông tin từ response
-        const errorResponse = error.response;
-        // Kiểm tra xem errorResponse có tồn tại không
-        if (errorResponse) {
-          setNotification(errorResponse.data.message || "Có lỗi xảy ra!"); // Hiển thị thông báo lỗi cụ thể
-        } else {
-          setNotification(`Có lỗi xảy ra!`); // Thông báo lỗi chung
-        }
-
-      } else {
-        console.log(error)
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-
-  };
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setSelectedFile(e.target.files[0]); // Cập nhật file đã chọn
-    }
-  };
-  const submitRegister = async (e: FormEvent<HTMLFormElement>) => {
-    try {
-      setIsSubmitting(true);
-      e.preventDefault();
-      if (userName == "" || password == "") {
-        setNotification("Thiếu userName hoặc mật khẩu"); // Thông báo lỗi chung
-        return;
-      }
-      if (password === confirmPassword) {
-
-        const response = await register({ userName, password, avatar: selectedFile });
-
-        setNotification(response.message); // Thông báo lỗi từ server
-
-      } else {
-        setNotification("Mật khẩu nhập lại không đúng"); // Thông báo lỗi chung
-        return;
+        setSuccessMessage("Đăng nhập thành công!"); // Thông báo thành công
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        // Bạn có thể lấy thông tin từ response
         const errorResponse = error.response;
-        // Kiểm tra xem errorResponse có tồn tại không
         if (errorResponse) {
           setNotification(errorResponse.data.message || "Có lỗi xảy ra!"); // Hiển thị thông báo lỗi cụ thể
         } else {
           setNotification("Có lỗi xảy ra!"); // Thông báo lỗi chung
         }
-
       } else {
-        setNotification("Có lỗi xảy ra! Vui lòng thử lại."); // Xử lý lỗi chung
+        setNotification("Có lỗi xảy ra! Vui lòng thử lại."); // Thông báo lỗi chung
       }
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false); // Kết thúc loading
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setSelectedFile(e.target.files[0]); // Cập nhật file đã chọn
+    }
+  };
+
+  const submitRegister = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true); // Bắt đầu loading
+    setNotification(""); // Reset thông báo trước khi gửi
+    setSuccessMessage(""); // Reset thông báo thành công trước khi gửi
+
+    if (userName === "" || password === "") {
+      setNotification("Thiếu userName hoặc mật khẩu"); // Thông báo lỗi chung
+      setIsSubmitting(false); // Kết thúc loading
+      return;
     }
 
+    if (password === confirmPassword) {
+      try {
+        const response = await register({ userName, password, avatar: selectedFile });
+        setSuccessMessage(response.message); // Thông báo thành công từ server
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          const errorResponse = error.response;
+          if (errorResponse) {
+            setNotification(errorResponse.data.message || "Có lỗi xảy ra!"); // Hiển thị thông báo lỗi cụ thể
+          } else {
+            setNotification("Có lỗi xảy ra!"); // Thông báo lỗi chung
+          }
+        } else {
+          setNotification("Có lỗi xảy ra! Vui lòng thử lại."); // Xử lý lỗi chung
+        }
+      }
+    } else {
+      setNotification("Mật khẩu nhập lại không đúng"); // Thông báo lỗi chung
+    }
+
+    setIsSubmitting(false); // Kết thúc loading
   };
+
   if (open) {
     return (
       <div className="bg-[#0000007d] w-full min-h-screen fixed inset-0 z-30 flex items-center justify-center font-karla">
@@ -109,7 +108,7 @@ const LoginModal: FC = () => {
         >
           <RxCross1
             className="absolute cursor-pointer right-5 top-5 hover:opacity-85"
-            onClick={() => { dispatch(updateModal(false)); setNotification("") }}
+            onClick={() => { dispatch(updateModal(false)); setNotification(""); setSuccessMessage(""); }}
           />
           {clicked ? (
             <>
@@ -172,14 +171,17 @@ const LoginModal: FC = () => {
                   )}
                 </button>
               </form>
+              {successMessage && (
+                <p className="text-green-500 text-center">{successMessage}</p> // Hiển thị thông báo thành công
+              )}
               {notification && (
-                <p className="text-red-500 text-center">{notification}</p> // Hiển thị thông báo
+                <p className="text-red-500 text-center">{notification}</p> // Hiển thị thông báo lỗi
               )}
               <p className="text-center mt-1">
                 Already have an account?{" "}
                 <span
                   className="text-blue-500 cursor-pointer"
-                  onClick={() => { setClicked(false); setNotification(" ") }}
+                  onClick={() => { setClicked(false); setNotification(""); setSuccessMessage(""); }}
                 >
                   Go to login
                 </span>
@@ -213,20 +215,32 @@ const LoginModal: FC = () => {
                   />
                   <RiLockPasswordFill className="absolute top-3 left-2 text-lg" />
                 </div>
-                <input
+                <button
                   type="submit"
-                  value="Submit"
-                  className="bg-blue-500 text-white rounded p-2 hover:bg-blue-700 cursor-pointer"
-                />
-                {notification && (
-                  <p className="text-red-500 text-center">{notification}</p> // Hiển thị thông báo
-                )}
+                  className={`bg-blue-500 text-white rounded p-2 hover:bg-blue-700 cursor-pointer ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <div className="flex items-center justify-center">
+                      <div className="loader"></div> {/* Hiển thị spinner */}
+                      <span className="ml-2">Đang đăng nhập...</span>
+                    </div>
+                  ) : (
+                    "Submit"
+                  )}
+                </button>
               </form>
+              {successMessage && (
+                <p className="text-green-500 text-center">{successMessage}</p> // Hiển thị thông báo thành công
+              )}
+              {notification && (
+                <p className="text-red-500 text-center">{notification}</p> // Hiển thị thông báo lỗi
+              )}
               <p className="text-center mt-1">
                 No Account?{" "}
                 <span
                   className="text-blue-500 cursor-pointer"
-                  onClick={() => { setClicked(true); setNotification(" ") }}
+                  onClick={() => { setClicked(true); setNotification(""); setSuccessMessage(""); }}
                 >
                   Register
                 </span>

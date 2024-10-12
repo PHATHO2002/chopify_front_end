@@ -48,15 +48,15 @@ const CustomPopup: FC = () => {
             dispatch(doLogout());
 
           } catch (error) {
-            console.log("check", error)
+            console.log(error);
           }
 
         } else {
-          console.log("check1", error); // Thông báo lỗi chung
+          console.log(error); // Thông báo lỗi chung
         }
 
       } else {
-        console.log("check2", error)
+        console.log(error);
       }
     }
   };
